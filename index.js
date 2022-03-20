@@ -147,87 +147,76 @@ function hasDuplicateLetters(word) {
     return false;
 }
 
-// STARE
-function getBestFirstWord() {
-
+function getMostCommonWord(group) {
     let highestIndex = 0;
     let highestScore = 0;
 
-    for (let i = 0; i < words.length; i++) {
+    for (let i = 0; i < group.length; i++) {
 
         let score = 0;
 
-        for (let c = 0; c < words.length; c++) {
+        for (let c = 0; c < group.length; c++) {
 
-            score += calculateSimilarity(words[i], words[c]);
+            score += calculateSimilarity(group[i], group[c]);
 
         }
 
-        if (score > highestScore && !hasDuplicateLetters(words[i])) {
+        if (score > highestScore && !hasDuplicateLetters(group[i])) {
             highestScore = score;
             highestIndex = i;
         }
 
     }
 
-    return words[highestIndex];
-
+    return group[highestIndex];
 }
 
-function notAGuess(word, grey) {
-    for (let c = 0; c < grey.length; c++) {
-        const char = word.charAt(c);
-        if (grey.includes(char)) {
-            return true;
+// BEST FIRST WORD
+// getMostCommonWord(words) => STARE
+
+function notAGuess(word, grey, yellow, green) {
+    for (let g = 0; g < grey.length; g++) {
+        const char = grey[g];
+        if (word.includes(char)) return true;
+    }
+
+    for (let r = 0; r < yellow.length; r++) {
+        for (let y = 0; y < 5; y++) {
+            const char = word.charAt(y);
+            const compare = yellow[r][y];
+            if (compare == "#") continue;
+            if (char == compare || !word.includes(compare)) return true;
         }
     }
+
+    for (let g = 0; g < 5; g++) {
+        const char = word.charAt(g);
+        const compare = green[g];
+        if (compare == "#") continue;
+        if (char != compare) return true;
+    }
+
     return false;
 }
 
-function hasLetterSameIndex() {
-
-}
-
-function getBestGuess(grey, yellow, green) { // FIX
-    let highestIndex = 0;
-    let highestScore = 0;
+function getBestGuess(grey, yellow, green) {
+    const guesses = [];
 
     for (let i = 0; i < words.length; i++) {
         const word = words[i];
-        if (notAGuess(word, grey)) continue;
-        
-        for (let c = 0; c < 5; c++) {
-            const char = word.charAt(c);
-            let score = 0;
-
-            for (let y = 0; y < 5; y++) {
-                if (yellow[y] == "#") continue;
-                if (char == yellow[y]) {
-                    if (word.indexOf(char) == y) break;
-                    score++;
-                }
-            }
-
-            for (let g = 0; g < 5; g++) {
-                if (green[g] == "#") continue;
-                if (char == green[g])
-                    score += 2;
-            }
-
-            if (score > highestScore) {
-                highestScore = score;
-                highestIndex = i;
-            }
-
-        }
-
+        if (notAGuess(word, grey, yellow, green)) continue;
+        guesses.push(word);
     }
 
-    return words[highestIndex];
+    return getMostCommonWord(guesses);
 }
 
 console.log(getBestGuess(
-    ["s","t","r","e","f","c"],
-    ["#","o","a","a","l"],
-    ["#","#","#","#","#"]
+    ["","","","",""],           // GREY
+    [
+        ["#","#","#","#","#"],  // YELLOW
+        ["#","#","#","#","#"],
+        ["#","#","#","#","#"]
+    ],
+    ["#","#","#","#","#"]       // GREEN
 ));
